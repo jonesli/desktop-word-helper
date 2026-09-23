@@ -16,7 +16,7 @@ const DEFAULTS = {
     hidePron: false,       // 隐藏发音：不显示音标，关闭朗读
     btn: {                 // 浮动条控制按钮显示配置
       prev: true, next: true, pause: true, star: true,
-      known: true, unknown: true,
+      known: true, unknown: true, set: true,
     },
     fontSize: 16,          // 浮动条字号
     theme: 'blue',         // blue | purple | green | orange | dark

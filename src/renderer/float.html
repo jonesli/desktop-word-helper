@@ -178,7 +178,7 @@
     if (settings.autoSpeak) speak(w.word);
   }
 
-  const BTN_DEFAULTS = { prev: true, next: true, pause: true, star: true, known: true, unknown: true };
+  const BTN_DEFAULTS = { prev: true, next: true, pause: true, star: true, known: true, unknown: true, set: true };
   function applyBtnConfig(cfg) {
     const show = (id, key) => {
       const on = cfg[key] === undefined ? BTN_DEFAULTS[key] : cfg[key];
@@ -190,6 +190,7 @@
     show('btnKnown', 'known');
     show('btnUnknown', 'unknown');
     show('btnStar', 'star');
+    show('btnSet', 'set');
   }
 
   async function quickMark(status, msg) {
@@ -246,20 +247,36 @@
   }
 
   // ---------- 展开/收起 ----------
+  // 收起采用迟滞策略：窗口高度是异步扩大的，指针移向卡片时可能短暂越界，
+  // 因此 mouseleave 只安排延迟收起，期间任何鼠标进入都会取消
   const bar = $('bar');
-  bar.addEventListener('mouseenter', () => {
+  const card = $('card');
+  let collapseTimer = null, pointerIn = false;
+  function expandNow() {
+    pointerIn = true;
     hovered = true;
+    if (collapseTimer) { clearTimeout(collapseTimer); collapseTimer = null; }
     if (!document.body.classList.contains('expanded')) {
       document.body.classList.add('expanded');
       api.expandFloat(true);
     }
-  });
-  document.body.addEventListener('mouseleave', () => {
-    document.body.classList.remove('expanded');
-    api.expandFloat(false);
-    hovered = false;
-    x = null; // 重新入场
-  });
+  }
+  function scheduleCollapse() {
+    pointerIn = false;
+    if (collapseTimer) return;
+    collapseTimer = setTimeout(() => {
+      collapseTimer = null;
+      if (pointerIn) return; // 宽限期内鼠标回来了
+      hovered = false;
+      document.body.classList.remove('expanded');
+      api.expandFloat(false);
+      x = null; // 重新入场
+    }, 350);
+  }
+  bar.addEventListener('mouseenter', expandNow);
+  card.addEventListener('mouseenter', expandNow);
+  document.body.addEventListener('mouseenter', expandNow, true); // 窗口内任意子元素进入都算
+  document.body.addEventListener('mouseleave', scheduleCollapse);
 
   // ---------- 按钮 ----------
   $('btnPrev').onclick = (e) => { e.stopPropagation(); api.prevWord().then(sync); };

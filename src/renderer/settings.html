@@ -190,8 +190,8 @@
     bindRange('speed', 'speedV', (v) => v + ' px/s');
     bindRange('opacity', 'opacityV', (v) => Math.round(v * 100) + '%');
     // 浮动条按钮
-    const BTN_DEFS = [['prev', '上一个'], ['next', '下一个'], ['pause', '暂停'], ['known', '认识'], ['unknown', '不熟悉'], ['star', '收藏']];
-    const BTN_DEFAULTS = { prev: true, next: true, pause: true, star: true, known: true, unknown: true };
+    const BTN_DEFS = [['prev', '上一个'], ['next', '下一个'], ['pause', '暂停'], ['known', '认识'], ['unknown', '不熟悉'], ['star', '收藏'], ['set', '设置']];
+    const BTN_DEFAULTS = { prev: true, next: true, pause: true, star: true, known: true, unknown: true, set: true };
     const btnCfg = Object.assign({}, BTN_DEFAULTS, settings.btn || {});
     $('btnToggles').innerHTML = BTN_DEFS.map(([k, label]) =>
       `<label class="tg"><input type="checkbox" data-k="${k}" ${btnCfg[k] ? 'checked' : ''}><i></i><span>${label}</span></label>`).join('');
