@@ -56,6 +56,13 @@
   .themes .t { width: 34px; height: 34px; border-radius: 10px; cursor: pointer; border: 2.5px solid transparent; }
   .themes .t.on { border-color: #26303e; }
   .val { font-size: 12px; color: #7c8aa0; min-width: 42px; text-align: right; }
+  .btn-toggles { display: grid; grid-template-columns: repeat(3, auto); gap: 8px 16px; }
+  .tg { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #5a6577; cursor: pointer; user-select: none; }
+  .tg input { display: none; }
+  .tg i { width: 32px; height: 18px; border-radius: 9px; background: #cfd8e6; position: relative; transition: .18s; flex: none; }
+  .tg i::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #fff; top: 2px; left: 2px; transition: .18s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+  .tg input:checked + i { background: #4f8cff; }
+  .tg input:checked + i::after { left: 16px; }
   .note { font-size: 12px; color: #93a0b4; line-height: 1.7; margin-top: 8px; }
   kbd { background: #eef1f6; border: 1px solid #d8dfe9; border-radius: 4px; padding: 1px 6px; font-size: 11px; }
 </style>
@@ -107,6 +114,8 @@
         <div style="display:flex;align-items:center;gap:8px"><input type="range" id="speed" min="20" max="160" step="5"><span class="val" id="speedV"></span></div></div>
       <div class="row"><div class="lbl">背景不透明度</div>
         <div style="display:flex;align-items:center;gap:8px"><input type="range" id="opacity" min="0.5" max="1" step="0.02"><span class="val" id="opacityV"></span></div></div>
+      <div class="row"><div class="lbl">浮动条按钮<span class="sub">控制条上显示哪些按钮</span></div>
+        <div class="btn-toggles" id="btnToggles"></div></div>
       <p class="note">浮动条可以整体拖动到任意位置，右缘可拖拽调整宽度；鼠标悬停展开详情，滚轮切换单词。</p>
     </div>
 
@@ -180,6 +189,19 @@
     bindRange('fontSize', 'fontSizeV', (v) => v + 'px');
     bindRange('speed', 'speedV', (v) => v + ' px/s');
     bindRange('opacity', 'opacityV', (v) => Math.round(v * 100) + '%');
+    // 浮动条按钮
+    const BTN_DEFS = [['prev', '上一个'], ['next', '下一个'], ['pause', '暂停'], ['known', '认识'], ['unknown', '不熟悉'], ['star', '收藏']];
+    const BTN_DEFAULTS = { prev: true, next: true, pause: true, star: true, known: true, unknown: true };
+    const btnCfg = Object.assign({}, BTN_DEFAULTS, settings.btn || {});
+    $('btnToggles').innerHTML = BTN_DEFS.map(([k, label]) =>
+      `<label class="tg"><input type="checkbox" data-k="${k}" ${btnCfg[k] ? 'checked' : ''}><i></i><span>${label}</span></label>`).join('');
+    document.querySelectorAll('#btnToggles input').forEach((inp) => {
+      inp.onchange = () => {
+        const cfg = Object.assign({}, BTN_DEFAULTS, settings.btn || {});
+        cfg[inp.dataset.k] = inp.checked;
+        save({ btn: cfg });
+      };
+    });
     // 通用
     $('autoStart').checked = settings.autoStart;
     $('mode').onchange = () => {

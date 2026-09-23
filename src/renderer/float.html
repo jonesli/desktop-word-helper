@@ -46,6 +46,8 @@
   }
   #ctrls button:hover { opacity: 1; background: rgba(255,255,255,.22); }
   #ctrls button.active { opacity: 1; color: #ffd54f; }
+  #ctrls button.ok:hover { background: rgba(46,194,132,.5); }
+  #ctrls button.no:hover { background: rgba(255,107,107,.5); }
   #resize { position: absolute; right: 0; top: 0; width: 10px; height: 100%; cursor: ew-resize; -webkit-app-region: no-drag; }
   #progress { position: absolute; left: 14px; right: 14px; bottom: 3px; height: 2px; border-radius: 1px; background: rgba(255,255,255,.2); overflow: hidden; }
   #progress i { display: block; height: 100%; width: 0; background: rgba(255,255,255,.85); border-radius: 1px; transition: width .4s; }
@@ -90,6 +92,8 @@
       <button id="btnPrev" title="上一个 (Ctrl+Alt+←)">‹</button>
       <button id="btnPause" title="暂停/播放 (Ctrl+Alt+P)">❚❚</button>
       <button id="btnNext" title="下一个 (Ctrl+Alt+→)">›</button>
+      <button id="btnKnown" class="ok" title="认识">✓</button>
+      <button id="btnUnknown" class="no" title="不熟悉">✗</button>
       <button id="btnStar" title="收藏">★</button>
       <button id="btnSet" title="设置">⚙</button>
       <button id="btnHide" title="隐藏浮动条 (Ctrl+Alt+H)">✕</button>
@@ -136,6 +140,7 @@
     const [c1, c2] = THEMES[settings.theme] || THEMES.blue;
     const alpha = Math.max(0.3, Math.min(1, +settings.opacity || 0.92));
     $('bar').style.background = `linear-gradient(135deg, ${hex2rgba(c1, alpha)}, ${hex2rgba(c2, alpha)})`;
+    applyBtnConfig(settings.btn || {});
     $('btnPause').textContent = paused ? '▶' : '❚❚';
     if (document.body.dataset.mode === 'flash') $('mtext').style.transform = '';
     x = null; flashStart = null;
@@ -172,6 +177,29 @@
     $('progress').firstElementChild.style.width = Math.min(100, ((wordInfo.todayShown || 0) / goal) * 100) + '%';
     if (settings.autoSpeak) speak(w.word);
   }
+
+  const BTN_DEFAULTS = { prev: true, next: true, pause: true, star: true, known: true, unknown: true };
+  function applyBtnConfig(cfg) {
+    const show = (id, key) => {
+      const on = cfg[key] === undefined ? BTN_DEFAULTS[key] : cfg[key];
+      $(id).style.display = on ? '' : 'none';
+    };
+    show('btnPrev', 'prev');
+    show('btnPause', 'pause');
+    show('btnNext', 'next');
+    show('btnKnown', 'known');
+    show('btnUnknown', 'unknown');
+    show('btnStar', 'star');
+  }
+
+  async function quickMark(status, msg) {
+    if (!wordInfo || !wordInfo.word) return;
+    await api.markWord(wordInfo.word.word, status);
+    flash(msg);
+    api.nextWord().then(sync);
+  }
+  $('btnKnown').onclick = (e) => { e.stopPropagation(); quickMark('known', '已标记为认识 ✓'); };
+  $('btnUnknown').onclick = (e) => { e.stopPropagation(); quickMark('unknown', '已标记为不熟悉 ✗'); };
 
   // ---------- 跑马灯 ----------
   let x = null, lastT = 0, flashStart = null;
