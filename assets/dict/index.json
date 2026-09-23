@@ -1,0 +1,37 @@
+{
+  "CET4": {
+    "name": "大学英语四级",
+    "count": 4544,
+    "file": "CET4.json"
+  },
+  "CET6": {
+    "name": "大学英语六级",
+    "count": 3991,
+    "file": "CET6.json"
+  },
+  "KaoYan": {
+    "name": "考研英语",
+    "count": 5047,
+    "file": "KaoYan.json"
+  },
+  "TOEFL": {
+    "name": "托福词汇",
+    "count": 10367,
+    "file": "TOEFL.json"
+  },
+  "TOEIC": {
+    "name": "托业词汇",
+    "count": 9697,
+    "file": "TOEIC.json"
+  },
+  "IELTS": {
+    "name": "雅思词汇",
+    "count": 5275,
+    "file": "IELTS.json"
+  },
+  "GRE": {
+    "name": "GRE词汇",
+    "count": 9984,
+    "file": "GRE.json"
+  }
+}

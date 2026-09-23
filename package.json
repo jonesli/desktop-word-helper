@@ -1,0 +1,24 @@
+{
+  "name": "buzhijue-beidanci",
+  "version": "1.0.0",
+  "description": "桌面背单词助手 - 桌面浮动条循环展示单词及释义，利用操作间隙无意识记忆",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --settings"
+  },
+  "keywords": [
+    "背单词",
+    "单词",
+    "英语学习"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^44.4.5"
+  },
+  "dependencies": {
+    "opencc-js": "^1.4.2"
+  }
+}

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>float</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+  html, body { background: transparent; overflow: hidden; font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif; }
+
+  :root {
+    --bg1: #3f7bff; --bg2: #5f8dff; --bar-alpha: .92;
+    --fg: #ffffff; --fg-dim: rgba(255,255,255,.72);
+  }
+  body[data-theme="purple"] { --bg1:#7c4dff; --bg2:#9c6dff; }
+  body[data-theme="green"]  { --bg1:#0fa968; --bg2:#2ec284; }
+  body[data-theme="orange"] { --bg1:#f2711c; --bg2:#ff9a3c; }
+  body[data-theme="dark"]   { --bg1:#2b2f3a; --bg2:#3a4050; }
+
+  #bar {
+    position: relative; height: 46px; display: flex; align-items: center;
+    padding: 0 10px 0 6px; border-radius: 24px; overflow: hidden;
+    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    box-shadow: 0 4px 18px rgba(0,0,0,.25);
+    -webkit-app-region: drag;
+    color: var(--fg);
+  }
+  #logo {
+    width: 30px; height: 30px; border-radius: 15px; flex: none;
+    background: rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; letter-spacing: .5px; margin-right: 8px;
+  }
+  #marquee { flex: 1; overflow: hidden; white-space: nowrap; height: 100%; display: flex; align-items: center; position: relative; }
+  #mtext {
+    display: inline-block; white-space: nowrap; will-change: transform;
+    font-size: var(--fs, 16px); font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,.15);
+  }
+  #mtext .ph { font-weight: 400; opacity: .8; font-size: .86em; margin-left: 8px; }
+  #mtext .tr { font-weight: 400; opacity: .95; font-size: .92em; margin-left: 8px; }
+  body[data-mode="flash"] #mtext { margin: 0 auto; text-align: center; }
+
+  #ctrls { flex: none; display: flex; gap: 2px; -webkit-app-region: no-drag; margin-left: 6px; }
+  #ctrls button {
+    width: 28px; height: 28px; border: 0; border-radius: 14px; cursor: pointer;
+    background: transparent; color: var(--fg); font-size: 14px; line-height: 1;
+    display: flex; align-items: center; justify-content: center; opacity: .55; transition: all .15s;
+  }
+  #ctrls button:hover { opacity: 1; background: rgba(255,255,255,.22); }
+  #ctrls button.active { opacity: 1; color: #ffd54f; }
+  #resize { position: absolute; right: 0; top: 0; width: 10px; height: 100%; cursor: ew-resize; -webkit-app-region: no-drag; }
+  #progress { position: absolute; left: 14px; right: 14px; bottom: 3px; height: 2px; border-radius: 1px; background: rgba(255,255,255,.2); overflow: hidden; }
+  #progress i { display: block; height: 100%; width: 0; background: rgba(255,255,255,.85); border-radius: 1px; transition: width .4s; }
+
+  #card {
+    margin-top: 8px; width: 100%; max-height: 288px; overflow-y: auto;
+    background: rgba(30, 34, 44, .96); color: #eef1f6; border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.35); padding: 16px 18px; display: none;
+    -webkit-app-region: no-drag;
+  }
+  body.expanded #card { display: block; }
+  #card::-webkit-scrollbar { width: 6px; }
+  #card::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 3px; }
+
+  .cw { font-size: 24px; font-weight: 700; letter-spacing: .3px; }
+  .phon { display: flex; gap: 14px; margin-top: 6px; flex-wrap: wrap; }
+  .phon span { font-size: 12px; color: #aab3c5; display: inline-flex; align-items: center; gap: 4px; }
+  .phon b { cursor: pointer; font-weight: 400; padding: 1px 7px; border-radius: 9px; background: rgba(255,255,255,.1); }
+  .phon b:hover { background: rgba(127,167,255,.35); }
+  .trans { margin-top: 10px; line-height: 1.65; font-size: 14px; }
+  .trans .pos { color: #7fb4ff; margin-right: 6px; font-style: italic; font-size: 12px; }
+  .sent { margin-top: 10px; padding: 8px 10px; background: rgba(255,255,255,.06); border-left: 3px solid #5f8dff; border-radius: 0 8px 8px 0; }
+  .sent .en { font-size: 13px; line-height: 1.5; color: #dde4f0; }
+  .sent .cn { font-size: 12px; color: #98a2b8; margin-top: 3px; }
+  .sent .src { font-size: 11px; color: #7fb4ff; margin-top: 2px; }
+  .marks { display: flex; gap: 10px; margin-top: 14px; }
+  .marks button {
+    flex: 1; height: 34px; border: 0; border-radius: 17px; cursor: pointer; font-size: 13px;
+    background: rgba(255,255,255,.1); color: #e8ecf5; transition: all .15s;
+  }
+  .marks button:hover { background: rgba(127,167,255,.3); }
+  .marks button.ok:hover { background: rgba(46,194,132,.4); }
+  .marks button.no:hover { background: rgba(255,107,107,.4); }
+  .tags { margin-top: 10px; font-size: 11px; color: #7b8499; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+  <div id="bar">
+    <div id="logo">Aa</div>
+    <div id="marquee"><span id="mtext"></span></div>
+    <div id="ctrls">
+      <button id="btnPrev" title="上一个 (Ctrl+Alt+←)">‹</button>
+      <button id="btnPause" title="暂停/播放 (Ctrl+Alt+P)">❚❚</button>
+      <button id="btnNext" title="下一个 (Ctrl+Alt+→)">›</button>
+      <button id="btnStar" title="收藏">★</button>
+      <button id="btnSet" title="设置">⚙</button>
+      <button id="btnHide" title="隐藏浮动条 (Ctrl+Alt+H)">✕</button>
+    </div>
+    <div id="resize" title="拖动调整宽度"></div>
+    <div id="progress"><i></i></div>
+  </div>
+
+  <div id="card">
+    <div class="cw" id="cWord"></div>
+    <div class="phon" id="cPhon"></div>
+    <div class="trans" id="cTrans"></div>
+    <div id="cBody"></div>
+    <div class="marks">
+      <button class="ok" id="mKnown">✓ 认识</button>
+      <button class="no" id="mUnknown">✗ 不熟悉</button>
+    </div>
+    <div class="tags"><span id="cIndex"></span><span id="cDict"></span></div>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  let settings = null, wordInfo = null, paused = false, hovered = false;
+  let voices = [], speakToken = 0;
+
+  // ---------- 主题/外观 ----------
+  function applySettings(s) {
+    settings = Object.assign({}, settings || {}, s);
+    if (s.__paused !== undefined) paused = s.__paused;
+    document.body.dataset.theme = settings.theme || 'blue';
+    document.body.dataset.mode = settings.mode === 'flash' ? 'flash' : 'scroll';
+    document.documentElement.style.setProperty('--fs', (settings.fontSize || 16) + 'px');
+    document.documentElement.style.setProperty('--bar-alpha', settings.opacity || .92);
+    $('bar').style.background = `linear-gradient(135deg, ${cssVar('--bg1')}, ${cssVar('--bg2')})`;
+    $('btnPause').textContent = paused ? '▶' : '❚❚';
+    if (document.body.dataset.mode === 'flash') $('mtext').style.transform = '';
+    x = null; flashStart = null;
+    render();
+  }
+  function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+  // ---------- 内容渲染 ----------
+  function esc(t) { return String(t || '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function stripTags(t) { return String(t || '').replace(/<[^>]+>/g, ''); }
+
+  function render() {
+    if (!wordInfo || !wordInfo.word) { $('mtext').textContent = '词库为空，请到设置中选择词库'; return; }
+    const w = wordInfo.word;
+    const tr = (w.trans || []).map((t) => `${t.pos ? t.pos + '. ' : ''}${t.tran}`).join('；');
+    $('mtext').innerHTML = `${esc(w.word)}${settings.hidePron ? '' : `<span class="ph">${esc(w.us || w.uk || '')}</span>`}<span class="tr">${esc(tr)}</span>`;
+    $('cWord').textContent = w.word;
+    const ph = [];
+    if (w.us) ph.push(`<span>US /${esc(w.us)}/ <b data-accent="us">🔊</b></span>`);
+    if (w.uk) ph.push(`<span>UK /${esc(w.uk)}/ <b data-accent="uk">🔊</b></span>`);
+    $('cPhon').innerHTML = settings.hidePron ? '' : (ph.join('') || '&nbsp;');
+    $('cTrans').innerHTML = (w.trans || []).map((t) =>
+      `<div><span class="pos">${esc(t.pos || '')}</span>${esc(t.tran)}</div>`).join('');
+    const body = [];
+    for (const s of (w.sentences || [])) {
+      body.push(`<div class="sent"><div class="en">${esc(s.en)}</div>${s.cn ? `<div class="cn">${esc(s.cn)}</div>` : ''}</div>`);
+    }
+    for (const s of (w.exam || [])) {
+      body.push(`<div class="sent"><div class="en">${esc(stripTags(s.en))}</div><div class="src">真题 ${esc(s.src || '')}</div></div>`);
+    }
+    $('cBody').innerHTML = body.join('');
+    $('cIndex').textContent = wordInfo.total ? `第 ${wordInfo.index}/${wordInfo.total} 词` : '';
+    $('cDict').textContent = `今日已展示 ${wordInfo.todayShown || 0} 次`;
+    const goal = wordInfo.dailyGoal || 50;
+    $('progress').firstElementChild.style.width = Math.min(100, ((wordInfo.todayShown || 0) / goal) * 100) + '%';
+    if (settings.autoSpeak) speak(w.word);
+  }
+
+  // ---------- 跑马灯 ----------
+  let x = null, lastT = 0, flashStart = null;
+  function tick(t) {
+    requestAnimationFrame(tick);
+    if (!settings) { lastT = t; return; }
+    if (paused || hovered) { lastT = t; flashStart = null; return; }
+    const dt = Math.min(0.1, (t - lastT) / 1000);
+    lastT = t;
+    // 直接展示模式：静止显示，停留数秒后切换下一个
+    if ((settings.mode || 'scroll') === 'flash') {
+      if (flashStart === null) flashStart = t;
+      else if (t - flashStart >= Math.max(2, settings.staySec || 10) * 1000) {
+        flashStart = t;
+        api.nextWord().then(sync);
+      }
+      return;
+    }
+    const el = $('mtext');
+    const vw = $('marquee').clientWidth;
+    const tw = el.offsetWidth;
+    if (x === null) x = vw; // 从右缘入场
+    x -= (settings.speed || 55) * dt;
+    if (tw > 0 && x < -tw) {
+      x = vw; // 一轮滚完，换下一个词
+      api.nextWord().then(sync);
+    }
+    el.style.transform = `translateX(${x}px)`;
+  }
+  requestAnimationFrame(tick);
+
+  // ---------- 发音 ----------
+  function loadVoices() { voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; }
+  if (window.speechSynthesis) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+  function speak(text, accent) {
+    if (!window.speechSynthesis || !text || settings.hidePron) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const lang = (accent || settings.accent || 'us') === 'uk' ? 'en-GB' : 'en-US';
+    u.lang = lang; u.rate = .92;
+    const v = voices.find((v) => v.lang === lang) || voices.find((v) => v.lang && v.lang.startsWith('en'));
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  }
+
+  // ---------- 展开/收起 ----------
+  const bar = $('bar');
+  bar.addEventListener('mouseenter', () => {
+    hovered = true;
+    if (!document.body.classList.contains('expanded')) {
+      document.body.classList.add('expanded');
+      api.expandFloat(true);
+    }
+  });
+  document.body.addEventListener('mouseleave', () => {
+    document.body.classList.remove('expanded');
+    api.expandFloat(false);
+    hovered = false;
+    x = null; // 重新入场
+  });
+
+  // ---------- 按钮 ----------
+  $('btnPrev').onclick = (e) => { e.stopPropagation(); api.prevWord().then(sync); };
+  $('btnNext').onclick = (e) => { e.stopPropagation(); api.nextWord().then(sync); };
+  $('btnPause').onclick = (e) => {
+    e.stopPropagation(); paused = !paused;
+    $('btnPause').textContent = paused ? '▶' : '❚❚';
+    if (paused) window.speechSynthesis && speechSynthesis.cancel();
+  };
+  $('btnStar').onclick = async (e) => {
+    e.stopPropagation();
+    if (!wordInfo || !wordInfo.word) return;
+    const s = await api.markWord(wordInfo.word.word, 'fav');
+    $('btnStar').classList.toggle('active', s === 'fav');
+  };
+  $('btnSet').onclick = (e) => { e.stopPropagation(); api.openSettings(); };
+  $('btnHide').onclick = (e) => { e.stopPropagation(); api.hideFloat(); };
+
+  $('mKnown').onclick = async () => {
+    if (!wordInfo || !wordInfo.word) return;
+    await api.markWord(wordInfo.word.word, 'known');
+    flash('已标记为认识 ✓');
+    api.nextWord().then(sync);
+  };
+  $('mUnknown').onclick = async () => {
+    if (!wordInfo || !wordInfo.word) return;
+    await api.markWord(wordInfo.word.word, 'unknown');
+    flash('已标记为不熟悉 ✗');
+    api.nextWord().then(sync);
+  };
+  $('cPhon').addEventListener('click', (e) => {
+    const b = e.target.closest('b[data-accent]');
+    if (b) speak(wordInfo.word.word, b.dataset.accent);
+  });
+  bar.addEventListener('click', (e) => { if (!e.target.closest('button')) speak(wordInfo && wordInfo.word && wordInfo.word.word); });
+  bar.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    (e.deltaY > 0 ? api.nextWord() : api.prevWord()).then(sync);
+  }, { passive: false });
+
+  function flash(msg) {
+    const old = $('mtext').innerHTML;
+    $('mtext').innerHTML = `<span class="tr">${esc(msg)}</span>`;
+    setTimeout(() => { if (wordInfo) render(); }, 700);
+  }
+  function sync(info) {
+    if (!info || !info.word) return;
+    wordInfo = info;
+    x = null;
+    flashStart = null;
+    render();
+  }
+
+  // ---------- 拖宽 ----------
+  let rz = null;
+  $('resize').addEventListener('mousedown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    rz = { sx: e.screenX, w: window.innerWidth };
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!rz) return;
+    const w = Math.max(320, Math.min(1000, rz.w + (e.screenX - rz.sx)));
+    document.body.style.width = w + 'px';
+    api.resizeFloat && api.resizeFloat(w);
+  });
+  window.addEventListener('mouseup', () => {
+    if (!rz) return;
+    rz = null;
+    const w = parseInt(document.body.style.width) || window.innerWidth;
+    api.saveFloatPos(null, w);
+  });
+
+  // ---------- IPC ----------
+  window.api.onWordUpdate((info) => sync(info));
+  window.api.onSettingsChanged((s) => applySettings(s));
+  window.api.onFloatShown(async () => { sync(await window.api.init().then((d) => d.wordInfo)); });
+
+  (async () => {
+    const d = await api.init();
+    settings = d.settings; paused = !!d.paused;
+    // 补充今日统计
+    try { const st = await api.getStats(); if (wordInfo === null) wordInfo = d.wordInfo; d.wordInfo.todayShown = st.todayShown; } catch {}
+    wordInfo = d.wordInfo;
+    applySettings(settings);
+  })();
+</script>
+</body>
+</html>
