@@ -116,20 +116,31 @@
   let voices = [], speakToken = 0;
 
   // ---------- 主题/外观 ----------
+  const THEMES = {
+    blue: ['#3f7bff', '#5f8dff'],
+    purple: ['#7c4dff', '#9c6dff'],
+    green: ['#0fa968', '#2ec284'],
+    orange: ['#f2711c', '#ff9a3c'],
+    dark: ['#2b2f3a', '#3a4050'],
+  };
+  const hex2rgba = (h, a) => {
+    const n = parseInt(h.slice(1), 16);
+    return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+  };
   function applySettings(s) {
     settings = Object.assign({}, settings || {}, s);
     if (s.__paused !== undefined) paused = s.__paused;
     document.body.dataset.theme = settings.theme || 'blue';
     document.body.dataset.mode = settings.mode === 'flash' ? 'flash' : 'scroll';
     document.documentElement.style.setProperty('--fs', (settings.fontSize || 16) + 'px');
-    document.documentElement.style.setProperty('--bar-alpha', settings.opacity || .92);
-    $('bar').style.background = `linear-gradient(135deg, ${cssVar('--bg1')}, ${cssVar('--bg2')})`;
+    const [c1, c2] = THEMES[settings.theme] || THEMES.blue;
+    const alpha = Math.max(0.3, Math.min(1, +settings.opacity || 0.92));
+    $('bar').style.background = `linear-gradient(135deg, ${hex2rgba(c1, alpha)}, ${hex2rgba(c2, alpha)})`;
     $('btnPause').textContent = paused ? '▶' : '❚❚';
     if (document.body.dataset.mode === 'flash') $('mtext').style.transform = '';
     x = null; flashStart = null;
     render();
   }
-  function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 
   // ---------- 内容渲染 ----------
   function esc(t) { return String(t || '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
