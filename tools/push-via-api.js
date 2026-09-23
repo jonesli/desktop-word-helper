@@ -47,15 +47,10 @@ function req(method, apiPath, body, tries = 5) {
   });
 }
 
-function listFiles(dir, base, out = []) {
-  for (const name of fs.readdirSync(dir)) {
-    if (name === '.git' || name === 'node_modules' || name === 'shots') continue;
-    const fp = path.join(dir, name);
-    const rel = path.relative(base, fp).split(path.sep).join('/');
-    if (fs.statSync(fp).isDirectory()) listFiles(fp, base, out);
-    else out.push(rel);
-  }
-  return out;
+function listFiles() {
+  // 以 git 索引为准（自动遵守 .gitignore，排除 node_modules/release 等）
+  return execSync('git -c core.quotepath=false ls-files', { cwd: path.join(__dirname, '..'), encoding: 'utf8' })
+    .split(/\r?\n/).filter(Boolean);
 }
 
 const MESSAGE = `feat: 桌面背单词助手 v1.0.0 — Electron 桌面浮动条背单词应用
@@ -86,7 +81,7 @@ const MESSAGE = `feat: 桌面背单词助手 v1.0.0 — Electron 桌面浮动条
     console.log('bootstrapped, initial commit:', parentSha.slice(0, 8));
   }
 
-  const files = listFiles(root, root);
+  const files = listFiles();
   console.log('files:', files.length);
 
   // 1. blobs

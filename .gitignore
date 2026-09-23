@@ -1,5 +1,6 @@
 node_modules/
 shots/
+release/
 *.log
 assets/dict/_*
 .DS_Store

@@ -24,6 +24,20 @@ npm run dev        # 同时打开设置窗口
 
 或双击 `启动背单词.bat`（需先完成 npm install）。
 
+## 打包
+
+```bat
+npm run dist
+```
+
+生成到 `release/` 目录：
+
+- `桌面背单词助手 Setup 1.0.0.exe` — NSIS 安装包（可选安装目录、创建桌面快捷方式）
+- `桌面背单词助手-便携版.exe` — 免安装单文件版
+
+> 国内网络请在环境变量中设置镜像后再打包：
+> `set ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/` 与 `set ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/`
+
 ## 项目结构
 
 ```
